@@ -70,7 +70,8 @@ $app->get("/cart", function(){
 
 	$page->setTpl("cart", [
 		'cart'=>$cart->getValues(),
-		'products'=>$cart->getProducts()
+		'products'=>$cart->getProducts(),
+		'error'=>Cart::getMsgError("Erro no frete")
 	]);
 
 });
@@ -123,4 +124,15 @@ $app->get("/cart/:idproduct/remove", function($idproduct){
 	header("Location: /cart");
 
 	exit;
+});
+
+$app->post("/cart/freight", function(){
+	
+	//Como deve ser feita a consulta do frete 
+	//$cart = Cart::getFromSession();
+	//$cart->setFreight($_POST['zipcode']);
+
+	header("Location: /cart");
+	
+	exit; 
 });
