@@ -104,7 +104,7 @@
 
                                             <tr class="shipping">
                                                 <th>Frete</th>
-                                                <td>R$ DESABILITADO <small>prazo de 0 dia(s)</small></td>
+                                                <td>DESABILITADO R$ <small>prazo de 0 dia(s)</small></td>
                                             </tr>
 
                                             <tr class="order-total">
