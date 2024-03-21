@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use \Hcode\Page;
 use \Hcode\Model\Product;
@@ -11,16 +11,16 @@ use \Hcode\Model\User;
 $app->get('/', function () {
 
 	$page = new Page();
-	
+
 	$products = Product::listAll();
-	
+
 	$page->setTpl("index", [
-		'products'=>Product::checkList($products)
+		'products' => Product::checkList($products)
 	]);
 });
 
-$app->get("/category/:idcategory",function($idcategory){
-	
+$app->get("/category/:idcategory", function ($idcategory) {
+
 	$page = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
 
 	$category = new Category();
@@ -31,24 +31,23 @@ $app->get("/category/:idcategory",function($idcategory){
 
 	$pages = [];
 
-	for ($i=1; $i <= $pagination['pages']; $i++) { 
+	for ($i = 1; $i <= $pagination['pages']; $i++) {
 		array_push($pages, [
-			'link'=>'/category/' .$category->getidcategory().'?page='.$i,
-			'page'=>$i
+			'link' => '/category/' . $category->getidcategory() . '?page=' . $i,
+			'page' => $i
 		]);
 	}
 
 	$page = new Page();
 
 	$page->setTpl("category", [
-		'category'=>$category->getValues(),
-		'products'=>$pagination["data"],
-		'pages'=>$pages
+		'category' => $category->getValues(),
+		'products' => $pagination["data"],
+		'pages' => $pages
 	]);
-
 });
 
-$app->get("/products/:desurl",function($desurl){
+$app->get("/products/:desurl", function ($desurl) {
 
 	$product = new Product();
 
@@ -57,27 +56,25 @@ $app->get("/products/:desurl",function($desurl){
 	$page = new Page();
 
 	$page->setTpl("product-detail", [
-		'product'=>$product->getValues(),
-		'categorys'=>$product->getCategories()
+		'product' => $product->getValues(),
+		'categorys' => $product->getCategories()
 	]);
-
 });
 
-$app->get("/cart", function(){
+$app->get("/cart", function () {
 
 	$cart = Cart::getFromSession();
 
 	$page = new Page();
 
 	$page->setTpl("cart", [
-		'cart'=>$cart->getValues(),
-		'products'=>$cart->getProducts(),
-		'error'=>Cart::getMsgError("Erro no frete")
+		'cart' => $cart->getValues(),
+		'products' => $cart->getProducts(),
+		'error' => Cart::getMsgError("Erro no frete")
 	]);
-
 });
 
-$app->get("/cart/:idproduct/add", function($idproduct){
+$app->get("/cart/:idproduct/add", function ($idproduct) {
 
 	$product = new Product();
 
@@ -87,7 +84,7 @@ $app->get("/cart/:idproduct/add", function($idproduct){
 
 	$qtd = (isset($_GET['qtd'])) ? (int)$_GET['qtd'] : 1;
 
-	for ($i=0;$i < $qtd; $i++){ 
+	for ($i = 0; $i < $qtd; $i++) {
 		$cart->addProduct($product);
 	}
 
@@ -96,7 +93,7 @@ $app->get("/cart/:idproduct/add", function($idproduct){
 	exit;
 });
 
-$app->get("/cart/:idproduct/minus", function($idproduct){
+$app->get("/cart/:idproduct/minus", function ($idproduct) {
 
 	$product = new Product();
 
@@ -111,7 +108,7 @@ $app->get("/cart/:idproduct/minus", function($idproduct){
 	exit;
 });
 
-$app->get("/cart/:idproduct/remove", function($idproduct){
+$app->get("/cart/:idproduct/remove", function ($idproduct) {
 
 	$product = new Product();
 
@@ -126,18 +123,18 @@ $app->get("/cart/:idproduct/remove", function($idproduct){
 	exit;
 });
 
-$app->post("/cart/freight", function(){
-	
+$app->post("/cart/freight", function () {
+
 	//Como deve ser feita a consulta do frete 
 	//$cart = Cart::getFromSession();
 	//$cart->setFreight($_POST['zipcode']);
 
 	header("Location: /cart");
-	
-	exit; 
+
+	exit;
 });
 
-$app->get("/checkout", function(){
+$app->get("/checkout", function () {
 
 	User::verifyLogin(false);
 
@@ -148,26 +145,26 @@ $app->get("/checkout", function(){
 	$page = new Page();
 
 	$page->setTpl("checkout", [
-		'cart'=>$cart->getValues(),
-		'address'=>$address->getValues()
+		'cart' => $cart->getValues(),
+		'address' => $address->getValues()
 	]);
-
 });
 
-$app->get("/login", function(){
+$app->get("/login", function () {
 
 	$page = new Page();
 
-	$page->setTpl("login",[
-		'error'=>User::getError()
+	$page->setTpl("login", [
+		'error' => User::getError(),
+		'errorRegister'=>User::getErrorRegister(),
+		'registerValues'=>(isset($_SESSION['registerValues'])) ? $_SESSION['registerValues'] : ['name'=>'','email'=>'','phone'=>'','password'=>'']
 	]);
-
 });
 
-$app->post("/login", function(){
-	try{
+$app->post("/login", function () {
+	try {
 		User::login($_POST['login'], $_POST['password']);
-	}catch(Exception $e){
+	} catch (Exception $e) {
 		User::setError($e->getMessage());
 	}
 
@@ -176,8 +173,53 @@ $app->post("/login", function(){
 	exit;
 });
 
-$app->get("/logout", function(){
+$app->get("/logout", function () {
 	User::logout();
 	header("Location: /login");
+	exit;
+});
+
+$app->post("/register", function () {
+
+	$_SESSION['registerValues'] = $_POST;
+
+	if (!isset($_POST['name']) || $_POST['name'] == '') {
+		User::setErrorRegister("Preencha o seu nome");
+		header("Location: /login");
+		exit;
+	}
+
+	if (!isset($_POST['email']) || $_POST['email'] == '') {
+		User::setErrorRegister("Preencha o seu email");
+		header("Location: /login");
+		exit;
+	}
+
+	if (!isset($_POST['password']) || $_POST['password'] == '') {
+		User::setErrorRegister("Preencha a senha");
+		header("Location: /login");
+		exit;
+	}
+
+	if(User::checkLoginExists($_POST['email']) === true){
+		User::setErrorRegister("Este email já está sendo usado por outro usuário.");
+		header("Location: /login");
+		exit;
+	}
+	
+	$user = new User();
+
+	$user->setData(['inadmin' => 0,
+	'deslogin' => $_POST['email'],
+	'desperson' => $_POST['name'],
+	'desemail' => $_POST['email'],
+	'despassword' => $_POST['password'],
+	'nrphone' => $_POST['phone']]);
+
+	$user->save();
+
+	User::login($_POST['email'], $_POST['password']);
+
+	header("Location: /checkout");
 	exit;
 });
