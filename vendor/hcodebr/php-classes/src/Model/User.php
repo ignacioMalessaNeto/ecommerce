@@ -162,7 +162,7 @@ class User extends Model
         ));
     }
 
-    public static function getForgot($email)
+    public static function getForgot($email, $inadmin = true)
     {
         $sql = new Sql();
 
@@ -196,7 +196,12 @@ class User extends Model
                 // Concatenando IV e texto cifrado antes de codificar em base64
                 $code = base64_encode($iv . $code);
 
-                $link = "http://www.igcommerce.com.br/admin/forgot/reset?code=$code";
+                if($inadmin === true){
+                    $link = "http://www.igcommerce.com.br/admin/forgot/reset?code=$code";
+                }else{
+                    $link = "http://www.igcommerce.com.br/forgot/reset?code=$code";
+                }
+
 
                 $mailer = new Mailer($data["desemail"], $data["desperson"], "Redefinir senha igcommerce", "forgot", array(
                     "name" => $data["desperson"],

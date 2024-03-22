@@ -160,23 +160,24 @@ $app->get("/login", function () {
 		'registerValues'=>(isset($_SESSION['registerValues'])) ? $_SESSION['registerValues'] : ['name'=>'','email'=>'','phone'=>'','password'=>'']
 	]);
 });
-
 $app->post("/login", function () {
-	try {
-		User::login($_POST['login'], $_POST['password']);
-	} catch (Exception $e) {
-		User::setError($e->getMessage());
-	}
-
-
-	header("Location: /checkout");
-	exit;
+    try {
+        User::login($_POST['login'], $_POST['password']);
+        // Limpar os valores dos campos de entrada da sessão após o login
+        unset($_SESSION['registerValues']);
+    } catch (Exception $e) {
+        User::setError($e->getMessage());
+    }
+    header("Location: /checkout");
+    exit;
 });
 
 $app->get("/logout", function () {
-	User::logout();
-	header("Location: /login");
-	exit;
+    User::logout();
+    // Limpar os valores dos campos de entrada da sessão após o logout
+    unset($_SESSION['registerValues']);
+    header("Location: /login");
+    exit;
 });
 
 $app->post("/register", function () {
@@ -222,4 +223,59 @@ $app->post("/register", function () {
 
 	header("Location: /checkout");
 	exit;
+});
+
+$app->get("/forgot", function(){
+
+	$page = new Page();
+
+	$page->setTpl("forgot");
+});
+
+$app->post("/forgot", function(){
+	
+	$user = User::getForgot($_POST["email"], false);
+
+	header("Location: /forgot/sent");
+	exit;
+
+});
+
+$app->get("/forgot/sent", function(){
+
+	$page = new Page();
+
+	$page->setTpl("forgot-sent");
+
+});
+
+$app->get("/forgot/reset", function(){
+
+	$user = User::validForgotDecrypt($_GET["code"]);
+	
+	$page = new Page();
+
+	$page->setTpl("forgot-reset", array(
+		"name"=>$user["desperson"],
+		"code"=>$_GET["code"]
+	));
+});
+
+$app->post("/forgot/reset",function(){
+	$forgot= User::validForgotDecrypt($_POST["code"]);
+
+	User::setForgotUsed($forgot["idrecovery"]);
+
+ 	$user = new User();
+
+	$user->get((int)$forgot["iduser"]);
+
+	$password =  password_hash($_POST["password"] , PASSWORD_DEFAULT, ["cost"=>12]);
+
+	$user->setPassword($password);
+
+	$page = new Page();
+	
+	$page->setTpl("forgot-reset-success");
+
 });
