@@ -156,28 +156,28 @@ $app->get("/login", function () {
 
 	$page->setTpl("login", [
 		'error' => User::getError(),
-		'errorRegister'=>User::getErrorRegister(),
-		'registerValues'=>(isset($_SESSION['registerValues'])) ? $_SESSION['registerValues'] : ['name'=>'','email'=>'','phone'=>'','password'=>'']
+		'errorRegister' => User::getErrorRegister(),
+		'registerValues' => (isset($_SESSION['registerValues'])) ? $_SESSION['registerValues'] : ['name' => '', 'email' => '', 'phone' => '', 'password' => '']
 	]);
 });
 $app->post("/login", function () {
-    try {
-        User::login($_POST['login'], $_POST['password']);
-        // Limpar os valores dos campos de entrada da sessão após o login
-        unset($_SESSION['registerValues']);
-    } catch (Exception $e) {
-        User::setError($e->getMessage());
-    }
-    header("Location: /checkout");
-    exit;
+	try {
+		User::login($_POST['login'], $_POST['password']);
+		// Limpar os valores dos campos de entrada da sessão após o login
+		unset($_SESSION['registerValues']);
+	} catch (Exception $e) {
+		User::setError($e->getMessage());
+	}
+	header("Location: /checkout");
+	exit;
 });
 
 $app->get("/logout", function () {
-    User::logout();
-    // Limpar os valores dos campos de entrada da sessão após o logout
-    unset($_SESSION['registerValues']);
-    header("Location: /login");
-    exit;
+	User::logout();
+	// Limpar os valores dos campos de entrada da sessão após o logout
+	unset($_SESSION['registerValues']);
+	header("Location: /login");
+	exit;
 });
 
 $app->post("/register", function () {
@@ -202,20 +202,22 @@ $app->post("/register", function () {
 		exit;
 	}
 
-	if(User::checkLoginExists($_POST['email']) === true){
+	if (User::checkLoginExists($_POST['email']) === true) {
 		User::setErrorRegister("Este email já está sendo usado por outro usuário.");
 		header("Location: /login");
 		exit;
 	}
-	
+
 	$user = new User();
 
-	$user->setData(['inadmin' => 0,
-	'deslogin' => $_POST['email'],
-	'desperson' => $_POST['name'],
-	'desemail' => $_POST['email'],
-	'despassword' => $_POST['password'],
-	'nrphone' => $_POST['phone']]);
+	$user->setData([
+		'inadmin' => 0,
+		'deslogin' => $_POST['email'],
+		'desperson' => $_POST['name'],
+		'desemail' => $_POST['email'],
+		'despassword' => $_POST['password'],
+		'nrphone' => $_POST['phone']
+	]);
 
 	$user->save();
 
@@ -225,57 +227,111 @@ $app->post("/register", function () {
 	exit;
 });
 
-$app->get("/forgot", function(){
+$app->get("/forgot", function () {
 
 	$page = new Page();
 
 	$page->setTpl("forgot");
 });
 
-$app->post("/forgot", function(){
-	
+$app->post("/forgot", function () {
+
 	$user = User::getForgot($_POST["email"], false);
 
 	header("Location: /forgot/sent");
 	exit;
-
 });
 
-$app->get("/forgot/sent", function(){
+$app->get("/forgot/sent", function () {
 
 	$page = new Page();
 
 	$page->setTpl("forgot-sent");
-
 });
 
-$app->get("/forgot/reset", function(){
+$app->get("/forgot/reset", function () {
 
 	$user = User::validForgotDecrypt($_GET["code"]);
-	
+
 	$page = new Page();
 
 	$page->setTpl("forgot-reset", array(
-		"name"=>$user["desperson"],
-		"code"=>$_GET["code"]
+		"name" => $user["desperson"],
+		"code" => $_GET["code"]
 	));
 });
 
-$app->post("/forgot/reset",function(){
-	$forgot= User::validForgotDecrypt($_POST["code"]);
+$app->post("/forgot/reset", function () {
+	$forgot = User::validForgotDecrypt($_POST["code"]);
 
 	User::setForgotUsed($forgot["idrecovery"]);
 
- 	$user = new User();
+	$user = new User();
 
 	$user->get((int)$forgot["iduser"]);
 
-	$password =  password_hash($_POST["password"] , PASSWORD_DEFAULT, ["cost"=>12]);
+	$password =  password_hash($_POST["password"], PASSWORD_DEFAULT, ["cost" => 12]);
 
 	$user->setPassword($password);
 
 	$page = new Page();
-	
+
 	$page->setTpl("forgot-reset-success");
+});
+
+$app->get("/profile", function(){
+
+	User::verifyLogin(false);
+
+	$user = User::getFromSession();
+
+	$page = new Page();
+
+	$page->setTpl("profile", [
+		'user'=>$user->getValues(),
+		'profileMsg'=>User::getSuccess(),
+		'profileError'=>User::getError()
+	]);
+
+});
+
+$app->post("/profile", function(){
+
+	User::verifyLogin(false);
+	
+	if(!isset($_POST['desperson']) || $_POST['desperson'] === ''){
+		User::setError("Preencha o seu nome.");
+		header("Location: /profile");
+		exit;
+	}
+
+	if(!isset($_POST['desemail']) || $_POST['desemail'] === ''){
+		User::setError("Preencha o seu email.");
+		header("Location: /profile");
+		exit;
+	}
+
+	$user = User::getFromSession();
+
+	if($_POST['desemail'] !== $user->getdesemail()){
+		if(User::checkLoginExists($_POST['desemail'] === true)){
+			User::setError("Este email já está cadastrado.");
+			header("Location: /profile");
+			exit;
+		}
+	}
+
+	$_POST['inadmin'] = $user->getinadmin();
+	$_POST['despassword'] = $user->getdespassword();
+	$_POST['deslogin'] = $_POST['desemail'];
+
+	$user->setData($_POST);
+
+	$user->update();
+
+	User::setSuccess("Dados alterados com sucesso.");
+
+	header("Location: /profile");
+	exit;
 
 });
