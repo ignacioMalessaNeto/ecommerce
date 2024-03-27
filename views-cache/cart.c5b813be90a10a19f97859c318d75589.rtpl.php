@@ -85,7 +85,7 @@
                                     
                                     <div class="coupon">
                                         <label for="cep">CEP:</label>
-                                        <input type="text" placeholder="00000-000" value="" id="cep" class="input-text" name="zipcode">
+                                        <input type="text" placeholder="00000-000" value="<?php echo htmlspecialchars( $cart["deszipcode"], ENT_COMPAT, 'UTF-8', FALSE ); ?>" id="cep" class="input-text" name="zipcode">
                                         <input type="submit" formmethod="post" formaction="/cart/freight" value="CALCULAR" class="button">
                                     </div>
 
@@ -104,7 +104,7 @@
 
                                             <tr class="shipping">
                                                 <th>Frete</th>
-                                                <td>DESABILITADO R$ <small>prazo de 0 dia(s)</small></td>
+                                                <td>R$<?php echo htmlspecialchars( $cart["vlfreight"], ENT_COMPAT, 'UTF-8', FALSE ); ?> <small>prazo de <?php echo htmlspecialchars( $cart["nrdays"], ENT_COMPAT, 'UTF-8', FALSE ); ?> dia(s)</small></td>
                                             </tr>
 
                                             <tr class="order-total">

@@ -102,7 +102,7 @@ class Cart extends Model
             ':idproduct' => $product->getidproduct()
         ]);
 
-        $this->getCalculateTotal();
+        $this->updateFreight();
     }
 
     public function removeProduct(Product $product, $all = false)
@@ -122,7 +122,7 @@ class Cart extends Model
             ]);
         }
 
-        $this->getCalculateTotal();
+        $this->updateFreight();
 
     }
 
@@ -167,86 +167,44 @@ class Cart extends Model
 
     public function setFreight($nrzipcode)
     {
+        $this->setdeszipcode($nrzipcode);
 
-        // $nrzipcode = str_replace('-', '', $nrzipcode);
+        $this->setnrdays(5);
+        
+        $this->setvlfreight(Cart::formatValueToDecimal(20.50));
 
-        // $totals = $this->getProductsTotals();
+        $this->save();
 
-        // if($totals['nrqtd'] > 0){
-
-        //     $qs = http_build_query([
-        //         'hCdEmpresa'=>'',
-        //         'sDsSenha'=>'',
-        //         'nCdServico'=>'40010',
-        //         'sCepOrigem'=>'93226350',
-        //         'sCepDestino'=>$nrzipcode,
-        //         'nVlPeso'=>$totals['vlweight'],
-        //         'nCdFormato'=>'1',
-        //         'nVlComprimento'=>$totals['vllength'],
-        //         'nVlAltura'=>$totals['vlheight'],
-        //         'nVlLargura'=>$totals['vlwidth'],
-        //         'nVlDiametro'=>'0',
-        //         'sCdMaoPropria'=>'S',
-        //         'nVlValorDeclarado'=>$totals['vlprice'],
-        //         'sCdAvisoRecebimento'=>'S'
-        //     ]);
-
-        //     $xml = (array)simplexml_load_file("http://ws.correios.com.br/calculator/CalcPrecoPrazo.asmx/CalcPrecoPrazo?".$qs);
-
-        // echo json_encode($xml);
-
-        // $result = $xml->Servicos->cServico;
-
-        // if($result->MsgErro != ''){
-        // Cart::setMsgError($result->MsgErro);
-        // }else{
-        //       Car::clearMsgError();
-        // }
-
-        // $this->setnrdays($results->PrazoEntrega);
-        // $this->setvlfreight(Cart::formatValueToDecimal($result->Valor));
-        // $this->setdeszipcode($nrzipcode);
-
-        // $this->save();
-
-        // return $result;
-
-        // }else{
-        //
-        // }
     }
 
-    // public static function formatValueToDecimal($value): float
-    // {
-    //     $value = str_replece('.', '', $value);
+    public static function formatValueToDecimal($value): float
+    {
+        $value = str_replace('.', '', $value);
 
-    //     return str_replace(',', '.', $value);
-    // }
+        return str_replace(',', '.', $value);
+    }
 
 
     public function updateFreight()
     {
-        $_SESSION[Cart::SESSION_ERROR] = NULL;
+        if ($this->getzipcode() != '') {
+            $this->setFreight($this->getdeszipcode());
+        }
     }
+    public static function setMsgError($msg)
+	{
 
+		$_SESSION[Cart::SESSION_ERROR] = $msg;
+	}
+    public static function getMsgError()
+	{
 
-    //Método para atualizar frete
-    // public static function setMsgError($msg)
-    // {
-    //     if($this->getzipcode() != ''){
-    //         $this->setFreight($this->getdeszipcode());
-    //     }
-    // }
+		$msg = (isset($_SESSION[Cart::SESSION_ERROR])) ? $_SESSION[Cart::SESSION_ERROR] : "";
 
+		Cart::clearMsgError();
 
-    public static function getMsgError($msg)
-    {
-        $msg = (isset($_SESSION[Cart::SESSION_ERROR])) ? $_SESSION[Cart::SESSION_ERROR] : "";
-
-        Cart::clearMsgError();
-
-        return $msg;
-    }
+		return $msg;
+	}
 
     public static function clearMsgError()
     {
@@ -269,7 +227,8 @@ class Cart extends Model
         $totals = $this->getProductsTotals();
 
         $this->setvlsubtotal($totals['vlprice']);
-        $this->setvltotal($totals['vlprice']);
-        // soma do frete mais o total + $this ->getvlfreight
+        $this->setvltotal($totals['vlprice'] + $this->getvlfreight());
     }
+
+    
 }

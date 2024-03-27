@@ -124,30 +124,123 @@ $app->get("/cart/:idproduct/remove", function ($idproduct) {
 });
 
 $app->post("/cart/freight", function () {
+	$cart = Cart::getFromSession();
 
-	//Como deve ser feita a consulta do frete 
-	//$cart = Cart::getFromSession();
-	//$cart->setFreight($_POST['zipcode']);
+    // Verifica se o campo 'zipcode' foi enviado no POST
+    if (isset($_POST['zipcode'])) {
+        // Define o frete e armazena o CEP no objeto Cart
+        $cart->setFreight($_POST['zipcode']);
+    } else {
+        // Se o campo 'zipcode' não foi enviado, você pode definir um erro ou lidar com isso de outra forma
+        // Por exemplo:
+        User::setError("CEP não foi fornecido.");
+        header("Location: /cart");
+        exit;
+    }
 
-	header("Location: /cart");
-
-	exit;
+    // Redireciona de volta para a página do carrinho
+    header("Location: /cart");
+    exit;
 });
 
 $app->get("/checkout", function () {
 
 	User::verifyLogin(false);
 
+	$address = new Address();
+	
 	$cart = Cart::getFromSession();
 
-	$address = new Address();
+	if(isset($_GET['zipcode'])){
+		$_GET['zipcode'] = $cart->getdeszipcode();
+	}
 
+	if(isset($_GET['zipcode'])){
+		
+		$address->loadFromCep($_GET['zipcode']);
+
+		$cart->setdeszipcode($_GET['zipcode']);
+
+		$cart->save();
+
+		$cart->getCalculateTotal();
+	}
+
+	if(!$address->getdesaddress()) $address->setdesaddress('');
+	if(!$address->getdescomplement()) $address->setdescomplement('');
+	if(!$address->getdesdistrict()) $address->setdesdistrict('');
+	if(!$address->getdescity()) $address->setdescity('');
+	if(!$address->getdesstate()) $address->setdesstate('');
+	if(!$address->getdescountry()) $address->setdescountry('');
+	if(!$address->getdeszipcode()) $address->setdeszipcode('');
+	
 	$page = new Page();
 
 	$page->setTpl("checkout", [
 		'cart' => $cart->getValues(),
-		'address' => $address->getValues()
+		'address' => $address->getValues(),
+		'products' => $cart->getProducts(),
+		'error'=> Address::getMsgError()
 	]);
+
+});
+
+$app->post("/checkout", function(){
+
+	User::verifylogin(false);
+
+	if(!isset($_POST['zipcode']) || $_POST['zipcode'] === ''){
+		Address::setMsgError("Informe o CEP.");
+		header("Location: /checkout");
+		exit;
+	}
+
+	if(!isset($_POST['desaddress']) || $_POST['desaddress'] === ''){
+		Address::setMsgError("Informe o endereço.");
+		header("Location: /checkout");
+	
+		exit;
+	}
+
+	if(!isset($_POST['desdistrict']) || $_POST['desdistrict'] === ''){
+		Address::setMsgError("Informe o bairro.");
+		header("Location: /checkout");
+		exit;
+	}
+
+	if(!isset($_POST['descity']) || $_POST['descity'] === ''){
+		Address::setMsgError("Informe o cidade.");
+		header("Location: /checkout");
+		exit;
+	}
+
+	if(!isset($_POST['desstate']) || $_POST['desstate'] === ''){
+		Address::setMsgError("Informe o estado.");
+		header("Location: /checkout");
+		exit;
+	}
+
+	if(!isset($_POST['descountry']) || $_POST['descountry'] === ''){
+		Address::setMsgError("Informe o país.");
+		header("Location: /checkout");
+		exit;
+	}
+
+
+	$user = User::getFromSession();
+
+	$address = new Address();
+
+	$_POST['deszipcode'] = $_POST['zipcode'];
+
+	$_POST['idperson'] = $user->getidperson();
+
+	$address->setData($_POST);
+
+	$address->save();
+
+	header("Location: /order");
+	exit;
 });
 
 $app->get("/login", function () {

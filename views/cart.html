@@ -81,7 +81,7 @@
                                     
                                     <div class="coupon">
                                         <label for="cep">CEP:</label>
-                                        <input type="text" placeholder="00000-000" value="" id="cep" class="input-text" name="zipcode">
+                                        <input type="text" placeholder="00000-000" value="{$cart.deszipcode}" id="cep" class="input-text" name="zipcode">
                                         <input type="submit" formmethod="post" formaction="/cart/freight" value="CALCULAR" class="button">
                                     </div>
 
@@ -100,7 +100,7 @@
 
                                             <tr class="shipping">
                                                 <th>Frete</th>
-                                                <td>DESABILITADO R$ <small>prazo de 0 dia(s)</small></td>
+                                                <td>R${$cart.vlfreight} <small>prazo de {$cart.nrdays} dia(s)</small></td>
                                             </tr>
 
                                             <tr class="order-total">
