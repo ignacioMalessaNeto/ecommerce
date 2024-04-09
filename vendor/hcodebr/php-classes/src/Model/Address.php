@@ -49,11 +49,11 @@ class Address extends Model
         $results = $sql->select("CALL sp_addresses_save(:idaddress, :idperson, :desaddress, :descomplement, :descity, :desstate, :descountry, :deszipcode, :desdistrict)", [
 			':idaddress' => $this->getidaddress(),
 			':idperson' => $this->getidperson(),
-			':desaddress' => utf8_decode($this->getdesaddress()),
-			':descomplement' => utf8_decode($this->getdescomplement()),
-			':descity' => utf8_decode($this->getdescity()),
-			':desstate' => utf8_decode($this->getdesstate()),
-			':descountry' => utf8_decode($this->getdescountry()),
+            ':desaddress' => mb_convert_encoding($this->getdesaddress(), 'UTF-8'),
+            ':descomplement' => mb_convert_encoding($this->getdescomplement(), 'UTF-8'),
+            ':descity' => mb_convert_encoding($this->getdescity(), 'UTF-8'),
+            ':desstate' => mb_convert_encoding($this->getdesstate(), 'UTF-8'),
+            ':descountry' => mb_convert_encoding($this->getdescountry(), 'UTF-8'),
 			':deszipcode' => $this->getdeszipcode(),
 			':desdistrict' => $this->getdesdistrict()
 		]);

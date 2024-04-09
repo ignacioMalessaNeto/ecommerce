@@ -12,7 +12,7 @@ use \Hcode\Model\Product;
 
 $app->get("/admin/categories", function(){
 
-	User::verifyLogin();
+	User::verifyLogin(true);
 
 	$categories = Category::listAll();
 
@@ -25,7 +25,7 @@ $app->get("/admin/categories", function(){
 
 $app->get("/admin/categories/create", function(){
 
-	User::verifyLogin();
+	User::verifyLogin(true);
 
 	$page = new PageAdmin();
 
@@ -34,7 +34,7 @@ $app->get("/admin/categories/create", function(){
 
 $app->post("/admin/categories/create", function(){
 
-	User::verifyLogin();
+	User::verifyLogin(true);
 
 	$category = new Category();
 
@@ -48,7 +48,7 @@ $app->post("/admin/categories/create", function(){
 
 $app->get("/admin/categories/:idcategory/delete", function($idcategory){
 
-	User::verifyLogin();
+	User::verifyLogin(true);
 
 	$category = new Category();
 
@@ -62,7 +62,7 @@ $app->get("/admin/categories/:idcategory/delete", function($idcategory){
 
 $app->get("/admin/categories/:idcategory", function($idcategory){
 	
-	User::verifyLogin();
+	User::verifyLogin(true);
 
 	$category = new Category();
 
@@ -77,7 +77,7 @@ $app->get("/admin/categories/:idcategory", function($idcategory){
 
 $app->post("/admin/categories/:idcategory", function($idcategory){
 	
-	User::verifyLogin();
+	User::verifyLogin(true);
 
 	$category = new Category();
 
@@ -94,7 +94,7 @@ $app->post("/admin/categories/:idcategory", function($idcategory){
 
 $app->get("/admin/categories/:idcategory/products", function($idcategory){
 	
-	User::verifyLogin();
+	User::verifyLogin(true);
 
 	$category = new Category();
 
@@ -111,7 +111,7 @@ $app->get("/admin/categories/:idcategory/products", function($idcategory){
 
 $app->get("/admin/categories/:idcategory/products/:idproduct/add", function($idcategory, $idproduct){
 	
-	User::verifyLogin();
+	User::verifyLogin(true);
 
 	$category = new Category();
 
@@ -129,7 +129,7 @@ $app->get("/admin/categories/:idcategory/products/:idproduct/add", function($idc
 
 $app->get("/admin/categories/:idcategory/products/:idproduct/remove", function($idcategory, $idproduct){
 	
-	User::verifyLogin();
+	User::verifyLogin(true);
 
 	$category = new Category();
 
