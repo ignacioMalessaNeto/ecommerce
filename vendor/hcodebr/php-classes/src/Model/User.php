@@ -198,9 +198,9 @@ class User extends Model
                 // Concatenando IV e texto cifrado antes de codificar em base64
                 $code = base64_encode($iv . $code);
 
-                if($inadmin === true){
+                if ($inadmin === true) {
                     $link = "http://www.igcommerce.com.br/admin/forgot/reset?code=$code";
-                }else{
+                } else {
                     $link = "http://www.igcommerce.com.br/forgot/reset?code=$code";
                 }
 
@@ -369,4 +369,22 @@ class User extends Model
         $_SESSION[User::SUCCESS] = NULL;
     }
 
+    public function getOrders()
+    {
+        $sql = new Sql();
+        $results = $sql->select(
+            'SELECT * 
+            FROM tb_orders a 
+            INNER JOIN tb_ordersstatus b USING(idstatus)
+            INNER JOIN tb_carts c USING(idcart)
+            INNER JOIN tb_users d ON d.iduser = a.iduser
+            INNER JOIN tb_addresses e USING(idaddress)
+            INNER JOIN tb_persons f ON  f.idperson = d.idperson
+            WHERE a.iduser = :iduser',
+            [
+                ':iduser' => $this->getiduser()
+            ]
+        );
+        return $results;
+    }
 }
