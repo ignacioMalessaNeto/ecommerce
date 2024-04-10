@@ -15,5 +15,6 @@ require("admin.php");
 require("admin-categories.php");
 require("admin-users.php");
 require("admin-products.php");
+require("admin-orders.php");
 require("functions.php");
 $app->run();
